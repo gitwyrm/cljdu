@@ -125,16 +125,15 @@
     "file"))
 
 (defn- row
-  [parent-size idx {:keys [path name kind size error]}]
+  [parent-size {:keys [path name kind size error]}]
   (let [dir? (= :dir kind)
-        muted "#a6adc8"
+        muted "#6c6f85"
         enter! #(when dir? (go-to! path))]
     (ui/hstack
      {:gap 10
       :padding 6
       :align :center
-      :on-click enter!
-      :bg (when (odd? idx) "#181825")}
+      :on-click enter!}
      (ui/label (kind-label kind)
                {:width 42
                 :font-size 12
@@ -183,7 +182,7 @@
              (str " · " skipped " unreadable path"
                   (when (not= 1 skipped) "s")
                   " skipped")))
-      {:font-size 12 :color "#a6adc8"})
+      {:font-size 12 :color "#6c6f85"})
      (when (and scanning? (:path progress))
        (ui/label (tilde (:path progress))
                  {:font-size 12 :color "#cba6f7"})))))
@@ -207,20 +206,20 @@
       (ui/label (if root
                   "Refresh to scan this folder."
                   "Open a folder to scan disk usage.")
-                {:padding 16 :color "#a6adc8"})
+                {:padding 16 :color "#6c6f85"})
 
       (and scanning? (nil? tree))
       (ui/label "Walking the filesystem…"
-                {:padding 16 :color "#a6adc8"})
+                {:padding 16 :color "#6c6f85"})
 
       (empty? kids)
       (ui/label "Empty directory"
-                {:padding 16 :color "#a6adc8"})
+                {:padding 16 :color "#6c6f85"})
 
       :else
       (ui/scroll
        {:flex 1}
-       (map-indexed #(row (:size node) %1 %2) kids)))))
+       (map #(row (:size node) %) kids)))))
 
 (defn- path-field
   [{:keys [path-draft]}]
@@ -228,7 +227,7 @@
    path-draft
    {:id "path"
     :placeholder "Folder path — Enter to scan"
-    :flex 1
+    :height 36
     :on-change #(swap! !state assoc :path-draft %)
     :on-submit submit-path!}))
 

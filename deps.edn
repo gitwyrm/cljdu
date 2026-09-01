@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
         clj-gpui/clj-gpui {:git/url "https://github.com/gitwyrm/clj-gpui.git"
-                           :git/sha "05280657a7e25c01d37335d64944702ceab5b31e"}}
+                           :git/sha "75c31c4630c2fd00b57db94aaa3187034221d7c5"}}
  ;; For framework hacking, replace the git dep with:
  ;;   clj-gpui/clj-gpui {:local/root "../clj-gpui"}
  :aliases
