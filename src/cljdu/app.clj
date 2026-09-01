@@ -140,8 +140,7 @@
                 :color muted})
      (ui/label (str name (when error (str "  (" error ")")))
                {:flex 1
-                :font-weight (when dir? :medium)
-                :on-click enter!})
+                :font-weight (when dir? :medium)})
      (ui/label (fmt/format-bytes size)
                {:width 88
                 :font-size 13})
@@ -238,7 +237,7 @@
       :chrome :app
       :width 720
       :height 640
-      :theme "Catppuccin Violet"}
+      :theme "Catppuccin Violet Dark"}
      (ui/vstack
       {:flex 1 :padding 14 :gap 10}
       (toolbar s)

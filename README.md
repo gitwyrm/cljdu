@@ -17,6 +17,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Live “Scanning…” path, size, and counts (no expensive pre-scan)
 - Remembers the last folder
 - Show the current folder in Finder / the system file manager
+- Catppuccin Violet Dark (pinned; does not follow OS light/dark)
 - Read-only: no delete
 
 ## Development
@@ -37,7 +38,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `d87137c4f9d06d0b8e3c27483cf8828f3b7149b6` (folder picker + packaging PR). Until that lands on `main`, use that SHA or a `:local/root` checkout of the matching branch.
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `2992d605cce7666ed7da46dc8ebcdd33d99f2edd` (folder picker + packaging PR). Until that lands on `main`, use that SHA or a `:local/root` checkout of the matching branch.
 
 ## Packaging
 
@@ -55,6 +56,8 @@ If the AppImage cannot mount FUSE, run it extracted:
 ```bash
 APPIMAGE_EXTRACT_AND_RUN=1 ./target/package/cljdu-0.1.0-x86_64.AppImage
 ```
+
+`LICENSE` and `NOTICE` from this repo are copied into the packages (`usr/share/doc/cljdu/` on Linux, `Contents/Resources/licenses/` on macOS).
 
 Other tasks: `clj -X:build uberjar`, `clj -X:build host`, `clj -X:build jre`.
 
