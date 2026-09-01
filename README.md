@@ -38,7 +38,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `7d86769194ea28dcb640ca50d4e7b94abe600df8` (scroll views fill leftover height).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `c31b0cf8edf7ed54ccf0114a85458c705ecc7120` (scroll views fill leftover height; viewport width/size live on the wrapper).
 
 ## Packaging
 
