@@ -43,3 +43,16 @@
   (is (= ["r"] (mapv :name (nav/breadcrumbs "/r" "/r"))))
   (is (= ["r" "a" "b"] (mapv :name (nav/breadcrumbs "/r" "/r/a/b"))))
   (is (= ["/r" "/r/a" "/r/a/b"] (mapv :path (nav/breadcrumbs "/r" "/r/a/b")))))
+
+(deftest tilde-path-uses-home
+  (is (= "~" (nav/tilde-path "/home/me" "/home/me")))
+  (is (= "~/.config" (nav/tilde-path "/home/me/.config" "/home/me")))
+  (is (= "/var/log" (nav/tilde-path "/var/log" "/home/me")))
+  (is (= "" (nav/tilde-path nil "/home/me"))))
+
+(deftest crumb-caption-tildes-the-root
+  (let [crumbs (nav/breadcrumbs "/home/me/.config" "/home/me/.config/cljdu")]
+    (is (= "~/.config"
+           (nav/crumb-caption (first crumbs) "/home/me/.config" "/home/me")))
+    (is (= "cljdu"
+           (nav/crumb-caption (second crumbs) "/home/me/.config" "/home/me")))))
