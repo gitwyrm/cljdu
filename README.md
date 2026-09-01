@@ -37,7 +37,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `75c31c4630c2fd00b57db94aaa3187034221d7c5` (folder picker + packaging PR). Until that lands on `main`, use that SHA or a `:local/root` checkout of the matching branch.
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `d87137c4f9d06d0b8e3c27483cf8828f3b7149b6` (folder picker + packaging PR). Until that lands on `main`, use that SHA or a `:local/root` checkout of the matching branch.
 
 ## Packaging
 
@@ -49,6 +49,12 @@ End users do not need Rust, Cargo, the Clojure CLI, or a system JDK. Packaging i
 | Linux | `clj -X:build package` | `target/package/cljdu-0.1.0-x86_64.AppImage` and `target/package/cljdu_0.1.0_amd64.deb` |
 
 Use `-X` (not `-T`) so clj-gpui stays on the classpath. That uses clj-gpui's `gpui.package` plus `gpui.edn` in this repo. The bundle contains a jlink JRE, an uberjar started with `gpui.prod` (no nREPL, no source watcher, no Cargo), and the GPUI host.
+
+If the AppImage cannot mount FUSE, run it extracted:
+
+```bash
+APPIMAGE_EXTRACT_AND_RUN=1 ./target/package/cljdu-0.1.0-x86_64.AppImage
+```
 
 Other tasks: `clj -X:build uberjar`, `clj -X:build host`, `clj -X:build jre`.
 
