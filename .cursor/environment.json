@@ -1,5 +1,0 @@
-{
-  "name": "cljdu",
-  "user": "ubuntu",
-  "install": "bash .cursor/install.sh"
-}
