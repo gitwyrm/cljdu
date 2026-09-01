@@ -1,0 +1,19 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.1"}
+        clj-gpui/clj-gpui {:git/url "https://github.com/gitwyrm/clj-gpui.git"
+                           :git/sha "5d94d6d32955a7d4c4ef543180e3f2f232c41aea"}}
+ ;; For framework hacking, replace the git dep with:
+ ;;   clj-gpui/clj-gpui {:local/root "../clj-gpui"}
+ :aliases
+ {:dev {:main-opts ["-m" "gpui.dev" "cljdu.app/app"]}
+  :test {:extra-paths ["test"]
+         :main-opts ["-m" "cljdu.test-runner"]}
+  :cljfmt {:extra-deps {dev.weavejester/cljfmt {:mvn/version "0.16.5"}}
+           :main-opts ["-m" "cljfmt.main"]}
+  :connect {:main-opts ["-m" "nrepl.cmdline"
+                        "--connect"
+                        "--host" "127.0.0.1"
+                        "--port" "7888"]}
+  :build {:extra-deps {io.github.clojure/tools.build {:mvn/version "0.10.10"}}
+          :ns-default gpui.package
+          :exec-fn gpui.package/package}}}
