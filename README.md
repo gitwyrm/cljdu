@@ -38,7 +38,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `2992d605cce7666ed7da46dc8ebcdd33d99f2edd` (folder picker + packaging PR). Until that lands on `main`, use that SHA or a `:local/root` checkout of the matching branch.
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `5d94d6d32955a7d4c4ef543180e3f2f232c41aea` (`main`, folder picker + packaging).
 
 ## Packaging
 
