@@ -1,0 +1,8 @@
+{:name "cljdu"
+ :version "0.1.0"
+ :main cljdu.app/app
+ :id "com.gitwyrm.cljdu"
+ :icon "resources/icon.png"
+ :title "cljdu"
+ :description "A native disk usage browser"
+ :maintainer "Chris <violetpurpleish@proton.me>"}
