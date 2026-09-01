@@ -56,6 +56,28 @@
                 [{:name (display-name root) :path root}]
                 parts)))))
 
+(defn tilde-path
+  "Replace a `$HOME` prefix with `~`. `home` defaults to `user.home`."
+  ([path]
+   (tilde-path path (System/getProperty "user.home")))
+  ([path home]
+   (cond
+     (nil? path) ""
+     (nil? home) (str path)
+     (= (str path) (str home)) "~"
+     (str/starts-with? (str path) (str home File/separator))
+     (str "~" (subs (str path) (count (str home))))
+     :else (str path))))
+
+(defn crumb-caption
+  "Visible label for one breadcrumb. The scan-root segment uses `tilde-path`."
+  ([crumb root]
+   (crumb-caption crumb root (System/getProperty "user.home")))
+  ([{:keys [name path]} root home]
+   (if (= path root)
+     (tilde-path path home)
+     name)))
+
 (defn enter
   "If `node` is a directory, return its path; otherwise return cwd."
   [cwd node]

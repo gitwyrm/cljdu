@@ -13,7 +13,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
 - Largest-first listing with human sizes and percent of the current folder
-- Drill in, Back, breadcrumbs, Refresh
+- Drill in, clickable path breadcrumbs, Back, Refresh
 - Live “Scanning…” path, size, and counts (no expensive pre-scan)
 - Remembers the last folder
 - Show the current folder in Finder / the system file manager
@@ -38,7 +38,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `5d94d6d32955a7d4c4ef543180e3f2f232c41aea` (`main`, folder picker + packaging).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `c31b0cf8edf7ed54ccf0114a85458c705ecc7120` (scroll views fill leftover height; viewport width/size live on the wrapper).
 
 ## Packaging
 

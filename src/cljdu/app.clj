@@ -25,15 +25,6 @@
   []
   (System/getProperty "user.home"))
 
-(defn- tilde
-  [path]
-  (let [h (home)]
-    (cond
-      (nil? path) ""
-      (= path h) "~"
-      (str/starts-with? path (str h "/")) (str "~" (subs path (count h)))
-      :else path)))
-
 (defn- apply-root
   [state root]
   (assoc state
@@ -43,7 +34,7 @@
          :scanning? true
          :progress {:path root :bytes 0 :files 0 :dirs 0 :skipped 0}
          :fatal nil
-         :path-draft (tilde root)))
+         :path-draft (nav/tilde-path root)))
 
 (defn start-scan!
   [root]
@@ -160,6 +151,30 @@
    (when scanning?
      (ui/label "Scanning…" {:font-size 13 :color "#cba6f7"}))))
 
+(defn- path-crumbs
+  [{:keys [root cwd]}]
+  (if-not root
+    (ui/label "No folder selected"
+              {:font-size 18 :font-weight :semibold :flex 1})
+    (let [crumbs (vec (nav/breadcrumbs root cwd))
+          last-i (dec (count crumbs))]
+      (ui/hstack
+       {:gap 6 :align :center :flex 1}
+       (when (nav/can-go-up? root cwd)
+         (ui/button "Back" go-up! {:variant :ghost :compact true}))
+       (map-indexed
+        (fn [i crumb]
+          (let [caption (nav/crumb-caption crumb root)
+                last? (= i last-i)
+                style (cond-> {:font-size 18}
+                        last? (assoc :font-weight :semibold)
+                        (not last?) (assoc :color "#a6adc8"
+                                           :on-click #(go-to! (:path crumb))))]
+            [(when (pos? i)
+               (ui/label "/" {:font-size 16 :color "#6c6f85"}))
+             (ui/label caption style)]))
+        crumbs)))))
+
 (defn- header
   [{:keys [root cwd tree scanning? progress]}]
   (let [node (or (nav/find-node tree cwd) tree)
@@ -171,8 +186,7 @@
      {:gap 4}
      (ui/hstack
       {:align :center :gap 8}
-      (ui/label (tilde (or cwd root "No folder selected"))
-                {:font-size 18 :font-weight :semibold :flex 1})
+      (path-crumbs {:root root :cwd cwd})
       (ui/label (fmt/format-bytes size)
                 {:font-size 18 :font-weight :semibold}))
      (ui/label
@@ -183,42 +197,34 @@
                   " skipped")))
       {:font-size 12 :color "#6c6f85"})
      (when (and scanning? (:path progress))
-       (ui/label (tilde (:path progress))
+       (ui/label (nav/tilde-path (:path progress))
                  {:font-size 12 :color "#cba6f7"})))))
-
-(defn- crumb-bar
-  [{:keys [root cwd]}]
-  (when root
-    (ui/hstack
-     {:gap 4 :align :center}
-     (ui/button "Back" go-up! {:variant :ghost :compact true})
-     (map (fn [{:keys [name path]}]
-            (ui/button name #(go-to! path) {:variant :text :compact true}))
-          (nav/breadcrumbs root cwd)))))
 
 (defn- listing
   [{:keys [tree cwd scanning? root]}]
   (let [node (or (nav/find-node tree cwd) tree)
         kids (:children node)]
-    (cond
-      (and (nil? tree) (not scanning?))
-      (ui/label (if root
-                  "Refresh to scan this folder."
-                  "Open a folder to scan disk usage.")
-                {:padding 16 :color "#6c6f85"})
+    (ui/vstack
+     {:flex 1}
+     (cond
+       (and (nil? tree) (not scanning?))
+       (ui/label (if root
+                   "Refresh to scan this folder."
+                   "Open a folder to scan disk usage.")
+                 {:padding 16 :color "#6c6f85"})
 
-      (and scanning? (nil? tree))
-      (ui/label "Walking the filesystem…"
-                {:padding 16 :color "#6c6f85"})
+       (and scanning? (nil? tree))
+       (ui/label "Walking the filesystem…"
+                 {:padding 16 :color "#6c6f85"})
 
-      (empty? kids)
-      (ui/label "Empty directory"
-                {:padding 16 :color "#6c6f85"})
+       (empty? kids)
+       (ui/label "Empty directory"
+                 {:padding 16 :color "#6c6f85"})
 
-      :else
-      (ui/scroll
-       {:flex 1}
-       (map #(row (:size node) %) kids)))))
+       :else
+       (ui/scroll
+        {:flex 1}
+        (map #(row (:size node) %) kids))))))
 
 (defn- path-field
   [{:keys [path-draft]}]
@@ -245,7 +251,6 @@
       (header s)
       (when (:fatal s)
         (ui/label (:fatal s) {:color "#f38ba8" :font-size 13}))
-      (crumb-bar s)
       (listing s)))))
 
 (defn- maybe-restore!
@@ -254,6 +259,6 @@
     (when-let [root (:root (persist/load-state))]
       (let [f (java.io.File. (str root))]
         (when (.isDirectory f)
-          (swap! !state assoc :root root :cwd root :path-draft (tilde root)))))))
+          (swap! !state assoc :root root :cwd root :path-draft (nav/tilde-path root)))))))
 
 (maybe-restore!)
