@@ -46,3 +46,20 @@
   (is (= "cljdu — ~/.config" (view/window-title "/home/me/.config"
                                                 "/home/me/.config"
                                                 "/home/me"))))
+
+(deftest chart-color-matches-host-utf8-hash
+  ;; "a" bytes [97] → 97 % 5 = 2 → chart.3
+  (is (= "#a6e3a1" (view/chart-color "a")))
+  ;; "big" → 98+105+103 = 306 % 5 = 1 → chart.2
+  (is (= "#94e2d5" (view/chart-color "big")))
+  ;; "Other" → 514 % 5 = 4 → chart.5
+  (is (= "#cba6f7" (view/chart-color "Other")))
+  (is (= (view/chart-color "chunk.bin") (view/chart-color "chunk.bin")))
+  (is (contains? (set view/chart-palette) (view/chart-color "…"))))
+
+(deftest legend-items-include-matching-swatch
+  (is (= [{:label "big" :color "#94e2d5" :size "60 B" :pct "60%"}
+          {:label "mid.txt" :color (view/chart-color "mid.txt") :size "30 B" :pct "30%"}
+          {:label "tiny" :color (view/chart-color "tiny") :size "10 B" :pct "10%"}]
+         (view/legend-items (view/usage-slices (:children sample-node) 6))))
+  (is (empty? (view/legend-items []))))

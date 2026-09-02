@@ -206,6 +206,18 @@
    (ui/skeleton {:width 360 :height 14})
    (ui/skeleton {:width 280 :height 14})))
 
+(defn- usage-legend
+  [slices]
+  (apply ui/vstack
+         {:gap 6 :flex 1 :justify :center}
+         (for [{:keys [label color size pct]} (view/legend-items slices)]
+           (ui/hstack
+            {:gap 8 :align :center}
+            (ui/vstack {:width 12 :height 12 :bg color})
+            (ui/label label {:flex 1})
+            (ui/label (str size "  " pct)
+                      {:color "#a6adc8" :font-size 13})))))
+
 (defn- usage-chart
   [slices kind]
   (when (>= (count slices) 2)
@@ -220,10 +232,9 @@
        (if (= kind :bar)
          (ui/bar-chart slices {:height 180})
          (ui/hstack
-          {:align :center :height 200}
-          (ui/spacer)
-          (ui/pie-chart slices {:width 220 :height 200})
-          (ui/spacer)))))))
+          {:align :center :gap 16 :height 200}
+          (ui/pie-chart slices {:width 180 :height 180})
+          (usage-legend slices)))))))
 
 (defn- listing
   [{:keys [tree cwd scanning? root selected chart]}]

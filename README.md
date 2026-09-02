@@ -13,7 +13,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
 - Largest-first table with kind, name, size, and percent of the current folder
-- Pie chart of the current folder (Bar tab until gpui-component has horizontal bars)
+- Pie chart of the current folder with a color legend (name, size, %); Bar tab until gpui-component has horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Native breadcrumbs, Back, Refresh
 - Live spinner and current path while scanning (no expensive pre-scan)
