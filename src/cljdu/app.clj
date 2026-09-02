@@ -21,7 +21,8 @@
            :scanning? false
            :progress nil
            :fatal nil
-           :path-draft ""}))
+           :path-draft ""
+           :chart :pie}))
 
 (defn- home
   []
@@ -205,8 +206,27 @@
    (ui/skeleton {:width 360 :height 14})
    (ui/skeleton {:width 280 :height 14})))
 
+(defn- usage-chart
+  [slices kind]
+  (when (>= (count slices) 2)
+    (let [kind (if (= kind :bar) :bar :pie)]
+      (ui/vstack
+       {:gap 6}
+       (ui/tabs kind
+                {:items [{:id :pie :label "Pie"}
+                         {:id :bar :label "Bar"}]
+                 :variant :underline
+                 :on-change #(swap! !state assoc :chart %)})
+       (if (= kind :bar)
+         (ui/bar-chart slices {:height 180})
+         (ui/hstack
+          {:align :center :height 200}
+          (ui/spacer)
+          (ui/pie-chart slices {:width 220 :height 200})
+          (ui/spacer)))))))
+
 (defn- listing
-  [{:keys [tree cwd scanning? root selected]}]
+  [{:keys [tree cwd scanning? root selected chart]}]
   (let [node (or (nav/find-node tree cwd) tree)
         kids (:children node)
         kid-ids (set (map :path kids))
@@ -229,8 +249,7 @@
        :else
        (ui/vstack
         {:flex 1 :gap 8}
-        (when (>= (count slices) 2)
-          (ui/bar-chart slices {:height 128}))
+        (usage-chart slices chart)
         (ui/table {:columns view/listing-columns
                    :rows (view/listing-rows node)
                    :selected selected
