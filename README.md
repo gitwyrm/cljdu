@@ -42,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `441c072e249e38cd2503118209d3f9791212d081` (gpui-component widgets, protocol v6; context-menu flex host).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `4373451ed861cce8a31d1d6882d2a0badf9b2bb2` (gpui-component widgets, protocol v6; pie slices colored by index).
 
 ## Packaging
 

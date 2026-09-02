@@ -48,35 +48,33 @@
    :value (long (or size 0))})
 
 (def chart-palette
-  "Catppuccin Violet Dark `chart.1`–`chart.5`.
+  "Pie colors in slice order (largest first, then Other).
 
-  Must stay in lockstep with `cljdu.theme` and with clj-gpui 0.5.1
-  `paint_chart` pie colors (host hashes the point label, then indexes
-  this palette)."
-  ["#89b4fa" "#94e2d5" "#a6e3a1" "#fab387" "#cba6f7"])
+  Matches clj-gpui `pie_palette`: theme `chart.1`–`chart.5`, then
+  `warning` and `danger`. Indexing (not a label hash) keeps six-plus
+  slices unique — the old 5-color hash made flutter and Other the
+  same mauve."
+  ["#89b4fa" "#94e2d5" "#a6e3a1" "#fab387" "#cba6f7"
+   "#f9e2af" "#f38ba8"])
 
 (defn chart-color
-  "Hex matching the host pie-slice color for `label`.
-
-  clj-gpui sums UTF-8 bytes of the label with wrapping usize add, then
-  takes that index modulo 5."
-  [label]
-  (let [bs (.getBytes (str label) java.nio.charset.StandardCharsets/UTF_8)
-        n (count chart-palette)
-        ix (mod (areduce bs i acc 0
-                         (unchecked-add acc (bit-and (aget bs i) 0xff)))
-                n)]
+  "Hex for pie slice `i` (0-based, largest-first). Same order as the host."
+  [i]
+  (let [n (count chart-palette)
+        ix (if (zero? n) 0 (mod (long i) n))]
     (nth chart-palette ix)))
 
 (defn legend-items
   "Pie legend rows: swatch color, name, size, percent of chart total."
   [slices]
   (let [total (max 1 (reduce + 0 (map #(long (:value % 0)) slices)))]
-    (mapv (fn [{:keys [label value]}]
-            {:label (str label)
-             :color (chart-color label)
-             :size (fmt/format-bytes value)
-             :pct (fmt/percent value total)})
+    (into []
+          (map-indexed
+           (fn [i {:keys [label value]}]
+             {:label (str label)
+              :color (chart-color i)
+              :size (fmt/format-bytes value)
+              :pct (fmt/percent value total)}))
           slices)))
 
 (defn usage-slices

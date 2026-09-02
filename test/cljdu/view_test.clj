@@ -47,19 +47,31 @@
                                                 "/home/me/.config"
                                                 "/home/me"))))
 
-(deftest chart-color-matches-host-utf8-hash
-  ;; "a" bytes [97] → 97 % 5 = 2 → chart.3
-  (is (= "#a6e3a1" (view/chart-color "a")))
-  ;; "big" → 98+105+103 = 306 % 5 = 1 → chart.2
-  (is (= "#94e2d5" (view/chart-color "big")))
-  ;; "Other" → 514 % 5 = 4 → chart.5
-  (is (= "#cba6f7" (view/chart-color "Other")))
-  (is (= (view/chart-color "chunk.bin") (view/chart-color "chunk.bin")))
-  (is (contains? (set view/chart-palette) (view/chart-color "…"))))
+(deftest chart-color-is-slice-index
+  (is (= "#89b4fa" (view/chart-color 0)))
+  (is (= "#94e2d5" (view/chart-color 1)))
+  (is (= "#cba6f7" (view/chart-color 4)))
+  (is (= "#f9e2af" (view/chart-color 5)))
+  (is (= "#f38ba8" (view/chart-color 6)))
+  (is (= 7 (count (set (map view/chart-color (range 7))))))
+  (is (= "#89b4fa" (view/chart-color 7))))
 
 (deftest legend-items-include-matching-swatch
-  (is (= [{:label "big" :color "#94e2d5" :size "60 B" :pct "60%"}
-          {:label "mid.txt" :color (view/chart-color "mid.txt") :size "30 B" :pct "30%"}
-          {:label "tiny" :color (view/chart-color "tiny") :size "10 B" :pct "10%"}]
+  (is (= [{:label "big" :color "#89b4fa" :size "60 B" :pct "60%"}
+          {:label "mid.txt" :color "#94e2d5" :size "30 B" :pct "30%"}
+          {:label "tiny" :color "#a6e3a1" :size "10 B" :pct "10%"}]
          (view/legend-items (view/usage-slices (:children sample-node) 6))))
+  (let [six (view/legend-items
+             (mapv (fn [i] {:label (str "n" i) :value 10}) (range 6)))]
+    (is (= 6 (count (set (map :color six)))))
+    (is (not= (:color (first six)) (:color (last six)))))
+  ;; flutter + Other hashed to the same mauve on the old host
+  (let [items (view/legend-items
+               [{:label "flutter" :value 45}
+                {:label "codex" :value 20}
+                {:label "clojure" :value 15}
+                {:label "Other" :value 8}])]
+    (is (= "#89b4fa" (:color (first items))))
+    (is (= "#fab387" (:color (last items))))
+    (is (not= (:color (first items)) (:color (last items)))))
   (is (empty? (view/legend-items []))))
