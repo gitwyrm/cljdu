@@ -3,7 +3,8 @@
             [cljdu.format-test]
             [cljdu.nav-test]
             [cljdu.persist-test]
-            [cljdu.scan-test]))
+            [cljdu.scan-test]
+            [cljdu.view-test]))
 
 (defn -main [& _]
   (let [{:keys [fail error]} (t/run-all-tests #"cljdu\..*-test")]

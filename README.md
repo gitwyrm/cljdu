@@ -12,11 +12,14 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Recursive scan of regular files and directories
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
-- Largest-first listing with human sizes and percent of the current folder
-- Drill in, clickable path breadcrumbs, Back, Refresh
-- Live “Scanning…” path, size, and counts (no expensive pre-scan)
+- Largest-first table with kind, name, size, and percent of the current folder
+- Bar chart of the biggest items in the current folder
+- Double-click a directory (or right-click → Open) to drill in
+- Native breadcrumbs, Back, Refresh
+- Live spinner and current path while scanning (no expensive pre-scan)
 - Remembers the last folder
-- Show the current folder in Finder / the system file manager
+- Show the current folder or selected item in Finder / the system file manager
+- Copy the current folder path
 - Catppuccin Violet Dark (pinned; does not follow OS light/dark)
 - Read-only: no delete
 
@@ -38,7 +41,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `c31b0cf8edf7ed54ccf0114a85458c705ecc7120` (scroll views fill leftover height; viewport width/size live on the wrapper).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `c0bf0e5c6cc55d68f84bd3a21e44191e038829fc` (gpui-component widgets, protocol v6).
 
 ## Packaging
 

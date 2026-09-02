@@ -5,6 +5,7 @@
             [cljdu.persist :as persist]
             [cljdu.scan :as scan]
             [cljdu.theme]
+            [cljdu.view :as view]
             [clojure.string :as str]
             [gpui.platform :as platform]
             [gpui.ratom :as r]
@@ -16,6 +17,7 @@
   (r/atom {:root nil
            :cwd nil
            :tree nil
+           :selected nil
            :scanning? false
            :progress nil
            :fatal nil
@@ -31,6 +33,7 @@
          :root root
          :cwd root
          :tree nil
+         :selected nil
          :scanning? true
          :progress {:path root :bytes 0 :files 0 :dirs 0 :skipped 0}
          :fatal nil
@@ -96,84 +99,81 @@
 (defn- go-to!
   [path]
   (when path
-    (swap! !state assoc :cwd path)))
+    (swap! !state assoc :cwd path :selected nil)))
 
 (defn- go-up!
   []
   (swap! !state (fn [s]
-                  (assoc s :cwd (nav/go-up (:root s) (:cwd s))))))
+                  (assoc s
+                         :cwd (nav/go-up (:root s) (:cwd s))
+                         :selected nil))))
 
-(defn- reveal-cwd!
+(defn- reveal-path
   []
-  (when-let [cwd (:cwd @!state)]
-    (platform/reveal-path! cwd)))
+  (or (:selected @!state) (:cwd @!state)))
 
-(defn- kind-label
-  [kind]
-  (case kind
-    :dir "dir"
-    :link "link"
-    "file"))
+(defn- reveal!
+  []
+  (when-let [path (reveal-path)]
+    (platform/reveal-path! path)))
 
-(defn- row
-  [parent-size {:keys [path name kind size error]}]
-  (let [dir? (= :dir kind)
-        muted "#6c6f85"
-        enter! #(when dir? (go-to! path))]
-    (ui/hstack
-     {:gap 10
-      :padding 6
-      :align :center
-      :on-click enter!}
-     (ui/label (kind-label kind)
-               {:width 42
-                :font-size 12
-                :color muted})
-     (ui/label (str name (when error (str "  (" error ")")))
-               {:flex 1
-                :font-weight (when dir? :medium)})
-     (ui/label (fmt/format-bytes size)
-               {:width 88
-                :font-size 13})
-     (ui/label (fmt/percent size parent-size)
-               {:width 44
-                :font-size 13
-                :color muted}))))
+(defn- enter-id!
+  [path]
+  (when-let [node (nav/find-node (:tree @!state) path)]
+    (when (= :dir (:kind node))
+      (go-to! path))))
+
+(defn- dir-selected?
+  [{:keys [tree selected]}]
+  (boolean
+   (and selected
+        (= :dir (:kind (nav/find-node tree selected))))))
+
+(defn- listing-menu
+  [state]
+  (into []
+        (concat
+         (when (dir-selected? state)
+           [{:id :open :label "Open folder" :icon :folder-open}])
+         [{:id :show :label "Show in file manager" :icon :external-link}])))
+
+(defn- on-listing-menu
+  [id]
+  (case id
+    :open (enter-id! (:selected @!state))
+    :show (reveal!)
+    nil))
 
 (defn- toolbar
   [{:keys [scanning?]}]
   (ui/hstack
    {:gap 8 :align :center}
-   (ui/button "Open…" choose-directory! {:primary true :compact true})
-   (ui/button "Refresh" refresh! {:compact true})
-   (ui/button "Show" reveal-cwd! {:variant :ghost :compact true})
+   (ui/button "Open…" choose-directory!
+              {:primary true :compact true :tooltip "Choose a folder to scan"})
+   (ui/button "Refresh" refresh!
+              {:compact true :tooltip "Scan this folder again"})
+   (ui/button "Show" reveal!
+              {:variant :ghost :compact true :tooltip "Reveal in the file manager"})
    (ui/spacer)
    (when scanning?
-     (ui/label "Scanning…" {:font-size 13 :color "#cba6f7"}))))
+     (ui/hstack
+      {:gap 6 :align :center}
+      (ui/spinner {:size :small})
+      (ui/label "Scanning…" {:font-size 13 :color "#cba6f7"})))))
 
 (defn- path-crumbs
   [{:keys [root cwd]}]
   (if-not root
     (ui/label "No folder selected"
               {:font-size 18 :font-weight :semibold :flex 1})
-    (let [crumbs (vec (nav/breadcrumbs root cwd))
-          last-i (dec (count crumbs))]
-      (ui/hstack
-       {:gap 6 :align :center :flex 1}
-       (when (nav/can-go-up? root cwd)
-         (ui/button "Back" go-up! {:variant :ghost :compact true}))
-       (map-indexed
-        (fn [i crumb]
-          (let [caption (nav/crumb-caption crumb root)
-                last? (= i last-i)
-                style (cond-> {:font-size 18}
-                        last? (assoc :font-weight :semibold)
-                        (not last?) (assoc :color "#a6adc8"
-                                           :on-click #(go-to! (:path crumb))))]
-            [(when (pos? i)
-               (ui/label "/" {:font-size 16 :color "#6c6f85"}))
-             (ui/label caption style)]))
-        crumbs)))))
+    (ui/hstack
+     {:gap 6 :align :center :flex 1}
+     (when (nav/can-go-up? root cwd)
+       (ui/button "Back" go-up!
+                  {:variant :ghost :compact true :tooltip "Parent folder"}))
+     (ui/breadcrumb (view/breadcrumb-items root cwd)
+                    {:flex 1 :on-change go-to!})
+     (ui/clipboard cwd {:tooltip "Copy this folder's path"}))))
 
 (defn- header
   [{:keys [root cwd tree scanning? progress]}]
@@ -189,42 +189,68 @@
       (path-crumbs {:root root :cwd cwd})
       (ui/label (fmt/format-bytes size)
                 {:font-size 18 :font-weight :semibold}))
-     (ui/label
-      (str files " files · " dirs " dirs"
-           (when (pos? skipped)
-             (str " · " skipped " unreadable path"
-                  (when (not= 1 skipped) "s")
-                  " skipped")))
-      {:font-size 12 :color "#6c6f85"})
+     (ui/hstack
+      {:gap 8 :align :center}
+      (ui/label
+       (str files " files · " dirs " dirs")
+       {:font-size 12 :color "#6c6f85"})
+      (when (pos? skipped)
+        (ui/tag (str skipped " skipped") {:variant :warning :size :small})))
      (when (and scanning? (:path progress))
        (ui/label (nav/tilde-path (:path progress))
                  {:font-size 12 :color "#cba6f7"})))))
 
+(defn- empty-listing
+  [message]
+  (ui/label message {:padding 16 :color "#6c6f85"}))
+
+(defn- scanning-placeholder
+  []
+  (ui/vstack
+   {:gap 8 :padding 16}
+   (ui/hstack
+    {:gap 8 :align :center}
+    (ui/spinner {:size :small})
+    (ui/label "Walking the filesystem…" {:color "#6c6f85"}))
+   (ui/skeleton {:width 420 :height 14})
+   (ui/skeleton {:width 360 :height 14})
+   (ui/skeleton {:width 280 :height 14})))
+
 (defn- listing
-  [{:keys [tree cwd scanning? root]}]
+  [{:keys [tree cwd scanning? root selected] :as state}]
   (let [node (or (nav/find-node tree cwd) tree)
-        kids (:children node)]
+        kids (:children node)
+        kid-ids (set (map :path kids))
+        selected (when (contains? kid-ids selected) selected)
+        slices (view/usage-slices kids)]
     (ui/vstack
      {:flex 1}
      (cond
        (and (nil? tree) (not scanning?))
-       (ui/label (if root
-                   "Refresh to scan this folder."
-                   "Open a folder to scan disk usage.")
-                 {:padding 16 :color "#6c6f85"})
+       (empty-listing (if root
+                        "Refresh to scan this folder."
+                        "Open a folder to scan disk usage."))
 
        (and scanning? (nil? tree))
-       (ui/label "Walking the filesystem…"
-                 {:padding 16 :color "#6c6f85"})
+       (scanning-placeholder)
 
        (empty? kids)
-       (ui/label "Empty directory"
-                 {:padding 16 :color "#6c6f85"})
+       (empty-listing "Empty directory")
 
        :else
-       (ui/scroll
-        {:flex 1}
-        (map #(row (:size node) %) kids))))))
+       (ui/vstack
+        {:flex 1 :gap 8}
+        (when (>= (count slices) 2)
+          (ui/bar-chart slices {:height 128}))
+        (ui/context-menu
+         (listing-menu (assoc state :selected selected))
+         {:flex 1 :on-change on-listing-menu}
+         (ui/table {:columns view/listing-columns
+                    :rows (view/listing-rows node)
+                    :selected selected
+                    :flex 1
+                    :on-change #(swap! !state assoc :selected %)
+                    :on-confirm enter-id!})))))))
 
 (defn- path-field
   [{:keys [path-draft]}]
@@ -239,18 +265,21 @@
 (defn app []
   (let [s @!state]
     (ui/window
-     {:title "cljdu"
+     {:title (view/window-title (:root s) (:cwd s))
       :chrome :app
-      :width 720
-      :height 640
+      :width 760
+      :height 700
       :theme "Catppuccin Violet Dark"}
      (ui/vstack
       {:flex 1 :padding 14 :gap 10}
       (toolbar s)
       (path-field s)
       (header s)
-      (when (:fatal s)
-        (ui/label (:fatal s) {:color "#f38ba8" :font-size 13}))
+      (when-let [msg (:fatal s)]
+        (ui/alert msg {:variant :error
+                       :title "Scan failed"
+                       :on-close #(swap! !state assoc :fatal nil)}))
+      (ui/divider)
       (listing s)))))
 
 (defn- maybe-restore!
