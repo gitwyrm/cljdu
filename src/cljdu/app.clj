@@ -209,14 +209,14 @@
 (defn- usage-legend
   [slices]
   (apply ui/vstack
-         {:gap 6 :flex 1 :justify :center}
+         {:gap 6 :justify :center}
          (for [{:keys [label color size pct]} (view/legend-items slices)]
            (ui/hstack
             {:gap 8 :align :center}
             (ui/vstack {:width 12 :height 12 :bg color})
-            (ui/label label {:flex 1})
-            (ui/label (str size "  " pct)
-                      {:color "#a6adc8" :font-size 13})))))
+            (ui/label label {:width 120})
+            (ui/label size {:color "#a6adc8" :font-size 13 :width 72})
+            (ui/label pct {:color "#a6adc8" :font-size 13 :width 40})))))
 
 (defn- usage-chart
   [slices kind]
