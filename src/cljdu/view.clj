@@ -48,23 +48,25 @@
    :value (long (or size 0))})
 
 (defn usage-slices
-  "Largest-first chart points for `children`, capped at `n` plus Other."
+  "Largest-first chart points for `children`, capped at `n` plus Other.
+
+  Slices under 2% of the folder are folded into Other so the chart
+  is not a row of unreadable labels."
   ([children]
    (usage-slices children chart-limit))
   ([children n]
-   (let [kids (vec (or children []))
-         n (max 0 (long n))]
+   (let [kids (filterv #(pos? (long (:size % 0))) (or children []))
+         n (max 0 (long n))
+         total (max 1 (reduce + 0 (map #(long (:size % 0)) kids)))
+         min-size (long (Math/ceil (* (double total) 0.02)))]
      (if (or (empty? kids) (zero? n))
        []
-       (let [points (if (<= (count kids) n)
-                      (mapv slice kids)
-                      (let [top (subvec kids 0 n)
-                            rest-size (reduce + 0 (map #(long (:size % 0))
-                                                       (subvec kids n)))]
-                        (cond-> (mapv slice top)
-                          (pos? rest-size)
-                          (conj {:id :other :label "Other" :value rest-size}))))]
-         (filterv #(pos? (:value %)) points))))))
+       (let [[big small] (split-with #(>= (long (:size % 0)) min-size) kids)
+             top (vec (take n big))
+             rest (concat (drop n big) small)
+             other (reduce + 0 (map #(long (:size % 0)) rest))]
+         (cond-> (mapv slice top)
+           (pos? other) (conj {:id :other :label "Other" :value other})))))))
 
 (defn breadcrumb-items
   "Breadcrumb widget items from the scan root to `cwd`."

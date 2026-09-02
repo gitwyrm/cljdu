@@ -30,6 +30,12 @@
   (is (empty? (view/usage-slices [])))
   (is (empty? (view/usage-slices [{:path "/z" :name "z" :size 0}]))))
 
+(deftest usage-slices-fold-tiny-into-other
+  (is (= [{:id "/a" :label "a" :value 100}
+          {:id :other :label "Other" :value 1}]
+         (view/usage-slices [{:path "/a" :name "a" :size 100}
+                             {:path "/b" :name "b" :size 1}] 6))))
+
 (deftest breadcrumb-items-use-paths-as-ids
   (is (= [{:id "/home/me" :label "~"}
           {:id "/home/me/proj" :label "proj"}]

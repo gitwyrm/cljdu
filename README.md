@@ -14,7 +14,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Unreadable paths are skipped, not fatal
 - Largest-first table with kind, name, size, and percent of the current folder
 - Bar chart of the biggest items in the current folder
-- Double-click a directory (or right-click → Open) to drill in
+- Double-click a directory (or select it and Open) to drill in
 - Native breadcrumbs, Back, Refresh
 - Live spinner and current path while scanning (no expensive pre-scan)
 - Remembers the last folder

@@ -129,31 +129,21 @@
    (and selected
         (= :dir (:kind (nav/find-node tree selected))))))
 
-(defn- listing-menu
-  [state]
-  (into []
-        (concat
-         (when (dir-selected? state)
-           [{:id :open :label "Open folder" :icon :folder-open}])
-         [{:id :show :label "Show in file manager" :icon :external-link}])))
-
-(defn- on-listing-menu
-  [id]
-  (case id
-    :open (enter-id! (:selected @!state))
-    :show (reveal!)
-    nil))
-
 (defn- toolbar
-  [{:keys [scanning?]}]
+  [{:keys [scanning?] :as state}]
   (ui/hstack
    {:gap 8 :align :center}
    (ui/button "Open…" choose-directory!
               {:primary true :compact true :tooltip "Choose a folder to scan"})
    (ui/button "Refresh" refresh!
               {:compact true :tooltip "Scan this folder again"})
+   (when (dir-selected? state)
+     (ui/button "Open" #(enter-id! (:selected state))
+                {:compact true :tooltip "Open the selected folder"}))
    (ui/button "Show" reveal!
               {:variant :ghost :compact true :tooltip "Reveal in the file manager"})
+   (when-let [cwd (:cwd state)]
+     (ui/clipboard cwd {:tooltip "Copy this folder's path"}))
    (ui/spacer)
    (when scanning?
      (ui/hstack
@@ -172,8 +162,7 @@
        (ui/button "Back" go-up!
                   {:variant :ghost :compact true :tooltip "Parent folder"}))
      (ui/breadcrumb (view/breadcrumb-items root cwd)
-                    {:flex 1 :on-change go-to!})
-     (ui/clipboard cwd {:tooltip "Copy this folder's path"}))))
+                    {:flex 1 :on-change go-to!}))))
 
 (defn- header
   [{:keys [root cwd tree scanning? progress]}]
@@ -217,7 +206,7 @@
    (ui/skeleton {:width 280 :height 14})))
 
 (defn- listing
-  [{:keys [tree cwd scanning? root selected] :as state}]
+  [{:keys [tree cwd scanning? root selected]}]
   (let [node (or (nav/find-node tree cwd) tree)
         kids (:children node)
         kid-ids (set (map :path kids))
@@ -242,15 +231,12 @@
         {:flex 1 :gap 8}
         (when (>= (count slices) 2)
           (ui/bar-chart slices {:height 128}))
-        (ui/context-menu
-         (listing-menu (assoc state :selected selected))
-         {:flex 1 :on-change on-listing-menu}
-         (ui/table {:columns view/listing-columns
-                    :rows (view/listing-rows node)
-                    :selected selected
-                    :flex 1
-                    :on-change #(swap! !state assoc :selected %)
-                    :on-confirm enter-id!})))))))
+        (ui/table {:columns view/listing-columns
+                   :rows (view/listing-rows node)
+                   :selected selected
+                   :flex 1
+                   :on-change #(swap! !state assoc :selected %)
+                   :on-confirm enter-id!}))))))
 
 (defn- path-field
   [{:keys [path-draft]}]
