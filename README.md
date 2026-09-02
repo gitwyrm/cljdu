@@ -15,6 +15,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Largest-first table with kind, name, size, and percent of the current folder
 - Pie chart of the current folder with a color legend (name, size, %); Bar tab until gpui-component has horizontal bars
 - Double-click a directory (or select it and Open) to drill in
+- Right-click the listing to open a folder or show it in the file manager
 - Native breadcrumbs, Back, Refresh
 - Live spinner and current path while scanning (no expensive pre-scan)
 - Remembers the last folder
@@ -41,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `c0bf0e5c6cc55d68f84bd3a21e44191e038829fc` (gpui-component widgets, protocol v6).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `441c072e249e38cd2503118209d3f9791212d081` (gpui-component widgets, protocol v6; context-menu flex host).
 
 ## Packaging
 

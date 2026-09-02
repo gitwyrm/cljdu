@@ -130,6 +130,21 @@
    (and selected
         (= :dir (:kind (nav/find-node tree selected))))))
 
+(defn- listing-menu
+  [state]
+  (into []
+        (concat
+         (when (dir-selected? state)
+           [{:id :open :label "Open folder" :icon :folder-open}])
+         [{:id :show :label "Show in file manager" :icon :external-link}])))
+
+(defn- on-listing-menu
+  [id]
+  (case id
+    :open (enter-id! (:selected @!state))
+    :show (reveal!)
+    nil))
+
 (defn- toolbar
   [{:keys [scanning?] :as state}]
   (ui/hstack
@@ -237,7 +252,7 @@
           (usage-legend slices)))))))
 
 (defn- listing
-  [{:keys [tree cwd scanning? root selected chart]}]
+  [{:keys [tree cwd scanning? root selected chart] :as state}]
   (let [node (or (nav/find-node tree cwd) tree)
         kids (:children node)
         kid-ids (set (map :path kids))
@@ -261,12 +276,15 @@
        (ui/vstack
         {:flex 1 :gap 8}
         (usage-chart slices chart)
-        (ui/table {:columns view/listing-columns
-                   :rows (view/listing-rows node)
-                   :selected selected
-                   :flex 1
-                   :on-change #(swap! !state assoc :selected %)
-                   :on-confirm enter-id!}))))))
+        (ui/context-menu
+         (listing-menu (assoc state :selected selected))
+         {:flex 1 :on-change on-listing-menu}
+         (ui/table {:columns view/listing-columns
+                    :rows (view/listing-rows node)
+                    :selected selected
+                    :flex 1
+                    :on-change #(swap! !state assoc :selected %)
+                    :on-confirm enter-id!})))))))
 
 (defn- path-field
   [{:keys [path-draft]}]
