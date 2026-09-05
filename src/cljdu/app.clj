@@ -245,7 +245,7 @@
                  :variant :underline
                  :on-change #(swap! !state assoc :chart %)})
        (if (= kind :bar)
-         (ui/horizontal-bar-chart slices {:labels true})
+         (ui/horizontal-bar-chart (view/bar-slices slices))
          (ui/hstack
           {:align :center :gap 16 :height 200}
           (ui/pie-chart slices {:width 180 :height 180})

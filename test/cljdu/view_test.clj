@@ -75,3 +75,14 @@
     (is (= "#fab387" (:color (last items))))
     (is (not= (:color (first items)) (:color (last items)))))
   (is (empty? (view/legend-items []))))
+
+(deftest bar-slices-use-format-bytes-in-label
+  (let [gap "\u2003\u2003"]
+    (is (= [{:id "/r/big" :label (str "big  60 B" gap) :value 60 :color "#89b4fa"}
+            {:id "/r/mid" :label (str "mid.txt  30 B" gap) :value 30 :color "#94e2d5"}
+            {:id "/r/tiny" :label (str "tiny  10 B" gap) :value 10 :color "#a6e3a1"}]
+           (view/bar-slices (view/usage-slices (:children sample-node) 6))))
+    (is (= (str "flutter  450.0 KB" gap)
+           (:label (first (view/bar-slices
+                           [{:id :flutter :label "flutter" :value 460800}])))))
+    (is (empty? (view/bar-slices [])))))
