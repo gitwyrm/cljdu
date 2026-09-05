@@ -233,25 +233,6 @@
             (ui/label size {:color "#a6adc8" :font-size 13 :width 72})
             (ui/label pct {:color "#a6adc8" :font-size 13 :width 40})))))
 
-(defn- usage-bar
-  "Horizontal bars with labels in an hstack. Kit's `:label-gap` is pie /
-  radar / sankey only, and its band labels sit 2px off the bars, so the
-  gap lives here instead (`:gap 16`, same as the pie legend)."
-  [slices]
-  (let [n (max 1 (count slices))
-        h (view/bar-chart-height slices)
-        row (int (Math/round (/ (double h) n)))]
-    (ui/hstack
-     {:gap 16 :align :start :height h}
-     (apply ui/vstack
-            {:align :stretch}
-            (for [s slices]
-              (ui/hstack
-               {:height row :align :center :justify :end}
-               (ui/label (view/bar-row-label s)
-                         {:font-size 13 :color "#a6adc8"}))))
-     (ui/horizontal-bar-chart slices {:label-axis false :height h :flex 1}))))
-
 (defn- usage-chart
   [slices kind]
   (when (>= (count slices) 2)
@@ -264,7 +245,7 @@
                  :variant :underline
                  :on-change #(swap! !state assoc :chart %)})
        (if (= kind :bar)
-         (usage-bar slices)
+         (ui/horizontal-bar-chart (view/bar-points slices))
          (ui/hstack
           {:align :center :gap 16 :height 200}
           (ui/pie-chart slices {:width 180 :height 180})

@@ -82,18 +82,13 @@
               :pct (fmt/percent value total)}))
           slices)))
 
-(defn bar-row-label
-  "Name plus formatted size for one Bar-tab row, same helper as the table
-  and pie legend."
-  [{:keys [label value]}]
-  (str label "  " (fmt/format-bytes value)))
-
-(defn bar-chart-height
-  "Viewport height matching clj-gpui's horizontal-bar default: 28px per
-  category plus 40, floored at 180."
+(defn bar-points
+  "Bar-tab chart points: same sizes as `usage-slices`, with formatted
+  byte counts on `:display` (Kit `BarChart::label` at the bar tip)."
   [slices]
-  (let [n (max 1 (count slices))]
-    (max 180 (+ (* n 28) 40))))
+  (mapv (fn [{:keys [value] :as s}]
+          (assoc s :display (fmt/format-bytes value)))
+        (or slices [])))
 
 (defn usage-slices
   "Largest-first chart points for `children`, capped at `n` plus Other.

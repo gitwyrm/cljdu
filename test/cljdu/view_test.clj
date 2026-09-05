@@ -76,13 +76,12 @@
     (is (not= (:color (first items)) (:color (last items)))))
   (is (empty? (view/legend-items []))))
 
-(deftest bar-row-label-uses-format-bytes
-  (is (= "big  60 B"
-         (view/bar-row-label {:label "big" :value 60})))
-  (is (= "flutter  450.0 KB"
-         (view/bar-row-label {:label "flutter" :value 460800}))))
-
-(deftest bar-chart-height-matches-host-heuristic
-  (is (= 180 (view/bar-chart-height [])))
-  (is (= 180 (view/bar-chart-height (repeat 4 {:value 1}))))
-  (is (= 236 (view/bar-chart-height (repeat 7 {:value 1})))))
+(deftest bar-points-put-format-bytes-on-display
+  (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa" :display "60 B"}
+          {:id "/r/mid" :label "mid.txt" :value 30 :color "#94e2d5" :display "30 B"}
+          {:id "/r/tiny" :label "tiny" :value 10 :color "#a6e3a1" :display "10 B"}]
+         (view/bar-points (view/usage-slices (:children sample-node) 6))))
+  (is (= "450.0 KB"
+         (:display (first (view/bar-points
+                           [{:id :flutter :label "flutter" :value 460800}])))))
+  (is (empty? (view/bar-points []))))
