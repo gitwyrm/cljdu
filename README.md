@@ -12,7 +12,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Recursive scan of regular files and directories
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
-- Largest-first table with kind, name, size, a share bar, and percent of the current folder
+- Largest-first table with kind icons, name, size, a share bar, and percent of the current folder
 - Pie chart of the current folder with a color legend (name, size, %); hover a legend row for the full path; Bar tab uses horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Right-click the listing to open a folder or show it in the file manager

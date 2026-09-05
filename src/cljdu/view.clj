@@ -4,7 +4,7 @@
             [cljdu.nav :as nav]))
 
 (def listing-columns
-  [{:id :kind :label "Kind" :width 56}
+  [{:id :kind :label "Kind" :width 40 :align :center}
    {:id :name :label "Name"}
    {:id :size :label "Size" :width 92}
    {:id :share :label "" :width 88 :selectable false}
@@ -19,6 +19,19 @@
     :link "link"
     "file"))
 
+(defn kind-icon
+  "DataTable Kind cell: Kit folder, file, or external-link icon.
+
+  `:text` is dump / `cell_text` (dir, file, link). There is no symlink
+  glyph in the Kit catalog, so links use `:external-link`."
+  [kind]
+  {:type :icon
+   :icon (case kind
+           :dir "folder"
+           :link "external-link"
+           "file")
+   :text (kind-label kind)})
+
 (defn- display-name
   [{:keys [name error]}]
   (str name (when error (str "  (" error ")"))))
@@ -29,7 +42,7 @@
   (let [parent-size (long (:size node 0))]
     (mapv (fn [{:keys [path kind size] :as child}]
             {:id path
-             :cells [(kind-label kind)
+             :cells [(kind-icon kind)
                      (display-name child)
                      (fmt/format-bytes size)
                      {:type :progress

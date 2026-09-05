@@ -14,16 +14,24 @@
 
 (deftest listing-rows-match-children
   (is (= [{:id "/r/big"
-           :cells ["dir" "big" "60 B"
+           :cells [{:type :icon :icon "folder" :text "dir"}
+                   "big" "60 B"
                    {:type :progress :value 60 :width 72} "60%"]}
           {:id "/r/mid"
-           :cells ["file" "mid.txt" "30 B"
+           :cells [{:type :icon :icon "file" :text "file"}
+                   "mid.txt" "30 B"
                    {:type :progress :value 30 :width 72} "30%"]}
           {:id "/r/tiny"
-           :cells ["link" "tiny  (unreadable)" "10 B"
+           :cells [{:type :icon :icon "external-link" :text "link"}
+                   "tiny  (unreadable)" "10 B"
                    {:type :progress :value 10 :width 72} "10%"]}]
          (view/listing-rows sample-node)))
   (is (empty? (view/listing-rows {:children []}))))
+
+(deftest kind-icon-matches-kind
+  (is (= {:type :icon :icon "folder" :text "dir"} (view/kind-icon :dir)))
+  (is (= {:type :icon :icon "file" :text "file"} (view/kind-icon :file)))
+  (is (= {:type :icon :icon "external-link" :text "link"} (view/kind-icon :link))))
 
 (deftest usage-slices-cap-and-other
   (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa"}
