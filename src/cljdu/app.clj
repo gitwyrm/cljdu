@@ -247,8 +247,8 @@
        (if (= kind :bar)
          (ui/horizontal-bar-chart (view/bar-points slices))
          (ui/hstack
-          {:align :center :gap 16 :height 200}
-          (ui/pie-chart slices {:width 180 :height 180})
+          {:align :center :gap 16 :height 240}
+          (ui/pie-chart slices {:width 400 :height 240 :labels true})
           (usage-legend slices)))))))
 
 (defn- listing
