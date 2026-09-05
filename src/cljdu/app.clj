@@ -150,14 +150,19 @@
   (ui/hstack
    {:gap 8 :align :center}
    (ui/button "Open…" choose-directory!
-              {:primary true :compact true :tooltip "Choose a folder to scan"})
+              {:primary true :compact true
+               :icon :folder-open
+               :tooltip "Choose a folder to scan"})
    (ui/button "Refresh" refresh!
               {:compact true :tooltip "Scan this folder again"})
    (when (dir-selected? state)
      (ui/button "Open" #(enter-id! (:selected state))
-                {:compact true :tooltip "Open the selected folder"}))
+                {:compact true :icon :folder
+                 :tooltip "Open the selected folder"}))
    (ui/button "Show" reveal!
-              {:variant :ghost :compact true :tooltip "Reveal in the file manager"})
+              {:variant :ghost :compact true
+               :icon :external-link
+               :tooltip "Reveal in the file manager"})
    (when-let [cwd (:cwd state)]
      (ui/clipboard cwd {:tooltip "Copy this folder's path"}))
    (ui/spacer)
@@ -178,7 +183,9 @@
      {:gap 6 :align :center :flex 1}
      (when (nav/can-go-up? root cwd)
        (ui/button "Back" go-up!
-                  {:variant :ghost :compact true :tooltip "Parent folder"}))
+                  {:variant :ghost :compact true
+                   :icon :arrow-left
+                   :tooltip "Parent folder"}))
      (ui/breadcrumb (view/breadcrumb-items root cwd)
                     {:flex 1 :on-change go-to!}))))
 
@@ -291,6 +298,7 @@
   (ui/input
    path-draft
    {:id "path"
+    :icon :folder
     :placeholder "Folder path — Enter to scan"
     :height 36
     :on-change #(swap! !state assoc :path-draft %)
@@ -311,7 +319,11 @@
                (ui/tag (str skipped " skipped")
                        {:variant :warning :size :small}))}
      (when scan-path
-       (ui/shimmer scan-path {:id "scan-path" :color "#cba6f7"})))))
+       (ui/shimmer scan-path {:id "scan-path"
+                              :color "#cba6f7"
+                              :flex 1
+                              :truncate true
+                              :text-overflow :ellipsis-middle})))))
 
 (defn app []
   (let [s @!state]

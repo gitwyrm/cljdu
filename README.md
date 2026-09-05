@@ -42,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `61b7fc5ec89d9d3bf2e7b1876556a9292f261cb7` (GPUI Kit 0.6 widgets, protocol 11).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `ac8eec1016eaef746c77ac1a6986d4275258e970` (GPUI Kit 0.6 widgets, protocol 11). That SHA forwards GPUI text clip (`:truncate`, `:text-overflow`) so the status-bar scan path stays one line.
 
 ## Packaging
 
