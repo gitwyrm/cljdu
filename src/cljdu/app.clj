@@ -236,17 +236,18 @@
 (defn- usage-bar
   "Horizontal bars with labels in an hstack. Kit's `:label-gap` is pie /
   radar / sankey only, and its band labels sit 2px off the bars, so the
-  gap lives here instead."
+  gap lives here instead (`:gap 16`, same as the pie legend)."
   [slices]
   (let [n (max 1 (count slices))
         h (view/bar-chart-height slices)
         row (int (Math/round (/ (double h) n)))]
     (ui/hstack
-     {:gap 12 :align :start :height h}
+     {:gap 16 :align :start :height h}
      (apply ui/vstack
+            {:align :stretch}
             (for [s slices]
               (ui/hstack
-               {:height row :align :center}
+               {:height row :align :center :justify :end}
                (ui/label (view/bar-row-label s)
                          {:font-size 13 :color "#a6adc8"}))))
      (ui/horizontal-bar-chart slices {:label-axis false :height h :flex 1}))))
