@@ -5,4 +5,4 @@
  :icon "resources/icon.png"
  :title "cljdu"
  :description "A native disk usage browser"
- :maintainer "Chris <violetpurpleish@proton.me>"}
+ :maintainer "violetpurpleish <violetpurpleish@proton.me>"}
