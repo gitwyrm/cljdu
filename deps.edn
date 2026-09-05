@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
         clj-gpui/clj-gpui {:git/url "https://github.com/gitwyrm/clj-gpui.git"
-                           :git/sha "f5f6152475b1c9f9764594ac72c698562f225505"}}
+                           :git/sha "ac8eec1016eaef746c77ac1a6986d4275258e970"}}
  :aliases
  {:dev {:main-opts ["-m" "gpui.dev" "cljdu.app/app"]}
   :local-gpui {:override-deps

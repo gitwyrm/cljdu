@@ -4,9 +4,10 @@
             [cljdu.nav :as nav]))
 
 (def listing-columns
-  [{:id :kind :label "Kind" :width 56}
+  [{:id :kind :label "Kind" :width 40 :align :center}
    {:id :name :label "Name"}
    {:id :size :label "Size" :width 92}
+   {:id :share :label "" :width 88 :selectable false}
    {:id :pct :label "%" :width 52}])
 
 (def chart-limit 6)
@@ -18,6 +19,19 @@
     :link "link"
     "file"))
 
+(defn kind-icon
+  "DataTable Kind cell: Kit folder, file, or external-link icon.
+
+  `:text` is dump / `cell_text` (dir, file, link). There is no symlink
+  glyph in the Kit catalog, so links use `:external-link`."
+  [kind]
+  {:type :icon
+   :icon (case kind
+           :dir "folder"
+           :link "external-link"
+           "file")
+   :text (kind-label kind)})
+
 (defn- display-name
   [{:keys [name error]}]
   (str name (when error (str "  (" error ")"))))
@@ -28,9 +42,12 @@
   (let [parent-size (long (:size node 0))]
     (mapv (fn [{:keys [path kind size] :as child}]
             {:id path
-             :cells [(kind-label kind)
+             :cells [(kind-icon kind)
                      (display-name child)
                      (fmt/format-bytes size)
+                     {:type :progress
+                      :value (fmt/share size parent-size)
+                      :width 72}
                      (fmt/percent size parent-size)]})
           (or (:children node) []))))
 
@@ -75,12 +92,23 @@
   (let [total (max 1 (reduce + 0 (map #(long (:value % 0)) slices)))]
     (into []
           (map-indexed
-           (fn [i {:keys [label value color]}]
-             {:label (str label)
-              :color (or color (chart-color i))
-              :size (fmt/format-bytes value)
-              :pct (fmt/percent value total)}))
+           (fn [i {:keys [id label value color]}]
+             (cond-> {:label (str label)
+                      :color (or color (chart-color i))
+                      :size (fmt/format-bytes value)
+                      :pct (fmt/percent value total)}
+               (some? id) (assoc :id id))))
           slices)))
+
+(defn legend-detail
+  "Hover-card copy for a legend row: full path, or Other's fold rule."
+  ([item]
+   (legend-detail item (System/getProperty "user.home")))
+  ([{:keys [id]} home]
+   (cond
+     (nil? id) nil
+     (= id :other) "Entries under 2% of this folder, combined."
+     :else (nav/tilde-path (str id) home))))
 
 (defn bar-points
   "Bar-tab chart points: same sizes as `usage-slices`, with formatted

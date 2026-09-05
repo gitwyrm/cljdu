@@ -13,11 +13,25 @@
                :error "unreadable"}]})
 
 (deftest listing-rows-match-children
-  (is (= [{:id "/r/big" :cells ["dir" "big" "60 B" "60%"]}
-          {:id "/r/mid" :cells ["file" "mid.txt" "30 B" "30%"]}
-          {:id "/r/tiny" :cells ["link" "tiny  (unreadable)" "10 B" "10%"]}]
+  (is (= [{:id "/r/big"
+           :cells [{:type :icon :icon "folder" :text "dir"}
+                   "big" "60 B"
+                   {:type :progress :value 60 :width 72} "60%"]}
+          {:id "/r/mid"
+           :cells [{:type :icon :icon "file" :text "file"}
+                   "mid.txt" "30 B"
+                   {:type :progress :value 30 :width 72} "30%"]}
+          {:id "/r/tiny"
+           :cells [{:type :icon :icon "external-link" :text "link"}
+                   "tiny  (unreadable)" "10 B"
+                   {:type :progress :value 10 :width 72} "10%"]}]
          (view/listing-rows sample-node)))
   (is (empty? (view/listing-rows {:children []}))))
+
+(deftest kind-icon-matches-kind
+  (is (= {:type :icon :icon "folder" :text "dir"} (view/kind-icon :dir)))
+  (is (= {:type :icon :icon "file" :text "file"} (view/kind-icon :file)))
+  (is (= {:type :icon :icon "external-link" :text "link"} (view/kind-icon :link))))
 
 (deftest usage-slices-cap-and-other
   (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa"}
@@ -57,9 +71,9 @@
   (is (= "#89b4fa" (view/chart-color 7))))
 
 (deftest legend-items-include-matching-swatch
-  (is (= [{:label "big" :color "#89b4fa" :size "60 B" :pct "60%"}
-          {:label "mid.txt" :color "#94e2d5" :size "30 B" :pct "30%"}
-          {:label "tiny" :color "#a6e3a1" :size "10 B" :pct "10%"}]
+  (is (= [{:id "/r/big" :label "big" :color "#89b4fa" :size "60 B" :pct "60%"}
+          {:id "/r/mid" :label "mid.txt" :color "#94e2d5" :size "30 B" :pct "30%"}
+          {:id "/r/tiny" :label "tiny" :color "#a6e3a1" :size "10 B" :pct "10%"}]
          (view/legend-items (view/usage-slices (:children sample-node) 6))))
   (let [six (view/legend-items
              (mapv (fn [i] {:label (str "n" i) :value 10}) (range 6)))]
@@ -75,6 +89,13 @@
     (is (= "#fab387" (:color (last items))))
     (is (not= (:color (first items)) (:color (last items)))))
   (is (empty? (view/legend-items []))))
+
+(deftest legend-detail-is-path-or-other-rule
+  (is (= "/r/big" (view/legend-detail {:id "/r/big"} "/home/me")))
+  (is (= "~/.config" (view/legend-detail {:id "/home/me/.config"} "/home/me")))
+  (is (= "Entries under 2% of this folder, combined."
+         (view/legend-detail {:id :other} "/home/me")))
+  (is (nil? (view/legend-detail {:label "n0"}))))
 
 (deftest bar-points-put-format-bytes-on-display
   (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa" :display "60 B"}

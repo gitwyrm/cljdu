@@ -12,12 +12,12 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Recursive scan of regular files and directories
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
-- Largest-first table with kind, name, size, and percent of the current folder
-- Pie chart of the current folder with a color legend (name, size, %); Bar tab uses horizontal bars
+- Largest-first table with kind icons, name, size, a share bar, and percent of the current folder
+- Pie chart of the current folder with a color legend (name, size, %); hover a legend row for the full path; Bar tab uses horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Right-click the listing to open a folder or show it in the file manager
 - Native breadcrumbs, Back, Refresh
-- Live spinner and current path while scanning (no expensive pre-scan)
+- Status bar with file/dir counts; shimmer and a progress circle while scanning (no expensive pre-scan)
 - Remembers the last folder
 - Show the current folder or selected item in Finder / the system file manager
 - Copy the current folder path
@@ -42,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `f5f6152475b1c9f9764594ac72c698562f225505` (GPUI Kit 0.6 widgets, protocol 11).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `ac8eec1016eaef746c77ac1a6986d4275258e970` (GPUI Kit 0.6 widgets, protocol 11). That SHA forwards GPUI text clip (`:truncate`, `:text-overflow`) so the status-bar scan path stays one line.
 
 ## Packaging
 
