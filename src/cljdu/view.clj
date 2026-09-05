@@ -82,22 +82,18 @@
               :pct (fmt/percent value total)}))
           slices)))
 
-(def ^:private bar-label-gap
-  "Kit measures the band label and then leaves only `TEXT_GAP` (2px)
-  before the bar. Chart `:label-gap` is pie / radar / sankey only, so
-  trailing em spaces are how we buy a readable gap: they are part of
-  the measured width, and right-aligned labels put them between the
-  visible text and the bar."
-  "\u2003\u2003")
+(defn bar-row-label
+  "Name plus formatted size for one Bar-tab row, same helper as the table
+  and pie legend."
+  [{:keys [label value]}]
+  (str label "  " (fmt/format-bytes value)))
 
-(defn bar-slices
-  "Chart points for the Bar tab: same sizes as `usage-slices`, with the
-  formatted byte count in the band label. Kit's on-bar labels are the
-  raw `:value`, so we do not ask it to print those."
+(defn bar-chart-height
+  "Viewport height matching clj-gpui's horizontal-bar default: 28px per
+  category plus 40, floored at 180."
   [slices]
-  (mapv (fn [{:keys [label value] :as s}]
-          (assoc s :label (str label "  " (fmt/format-bytes value) bar-label-gap)))
-        (or slices [])))
+  (let [n (max 1 (count slices))]
+    (max 180 (+ (* n 28) 40))))
 
 (defn usage-slices
   "Largest-first chart points for `children`, capped at `n` plus Other.
