@@ -13,9 +13,15 @@
                :error "unreadable"}]})
 
 (deftest listing-rows-match-children
-  (is (= [{:id "/r/big" :cells ["dir" "big" "60 B" "60%"]}
-          {:id "/r/mid" :cells ["file" "mid.txt" "30 B" "30%"]}
-          {:id "/r/tiny" :cells ["link" "tiny  (unreadable)" "10 B" "10%"]}]
+  (is (= [{:id "/r/big"
+           :cells ["dir" "big" "60 B"
+                   {:type :progress :value 60 :width 72} "60%"]}
+          {:id "/r/mid"
+           :cells ["file" "mid.txt" "30 B"
+                   {:type :progress :value 30 :width 72} "30%"]}
+          {:id "/r/tiny"
+           :cells ["link" "tiny  (unreadable)" "10 B"
+                   {:type :progress :value 10 :width 72} "10%"]}]
          (view/listing-rows sample-node)))
   (is (empty? (view/listing-rows {:children []}))))
 

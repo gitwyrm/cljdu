@@ -7,6 +7,7 @@
   [{:id :kind :label "Kind" :width 56}
    {:id :name :label "Name"}
    {:id :size :label "Size" :width 92}
+   {:id :share :label "" :width 88 :selectable false}
    {:id :pct :label "%" :width 52}])
 
 (def chart-limit 6)
@@ -31,6 +32,9 @@
              :cells [(kind-label kind)
                      (display-name child)
                      (fmt/format-bytes size)
+                     {:type :progress
+                      :value (fmt/share size parent-size)
+                      :width 72}
                      (fmt/percent size parent-size)]})
           (or (:children node) []))))
 

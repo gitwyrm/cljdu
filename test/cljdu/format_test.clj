@@ -19,3 +19,13 @@
   (is (= "50%" (fmt/percent 1 2)))
   (is (= "100%" (fmt/percent 10 10)))
   (is (= "99%" (fmt/percent 999 1000))))
+
+(deftest share-is-0-to-100
+  (is (= 0 (fmt/share 1 0)))
+  (is (= 0 (fmt/share 0 100)))
+  (is (= 0 (fmt/share 1 1000)))
+  (is (= 43 (fmt/share 43 100)))
+  (is (= 50 (fmt/share 1 2)))
+  (is (= 100 (fmt/share 10 10)))
+  (is (= 100 (fmt/share 999 1000)))
+  (is (= 100 (fmt/share 200 100))))

@@ -31,3 +31,12 @@
                 (< p 0.5) "<1%"
                 (>= p 99.5) (if (< part total) "99%" "100%")
                 :else (str (int (Math/round p)) "%"))))))
+
+(defn share
+  "0-100 integer share of `part` relative to `total` for a progress bar."
+  [part total]
+  (let [part (long (or part 0))
+        total (long (or total 0))]
+    (cond
+      (or (<= total 0) (<= part 0)) 0
+      :else (int (Math/round (* 100.0 (min 1.0 (/ (double part) (double total)))))))))

@@ -12,7 +12,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Recursive scan of regular files and directories
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
-- Largest-first table with kind, name, size, and percent of the current folder
+- Largest-first table with kind, name, size, a share bar, and percent of the current folder
 - Pie chart of the current folder with a color legend (name, size, %); hover a legend row for the full path; Bar tab uses horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Right-click the listing to open a folder or show it in the file manager
@@ -42,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `f5f6152475b1c9f9764594ac72c698562f225505` (GPUI Kit 0.6 widgets, protocol 11).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `61b7fc5ec89d9d3bf2e7b1876556a9292f261cb7` (GPUI Kit 0.6 widgets, protocol 11).
 
 ## Packaging
 
