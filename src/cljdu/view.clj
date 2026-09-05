@@ -48,21 +48,26 @@
    :value (long (or size 0))})
 
 (def chart-palette
-  "Pie colors in slice order (largest first, then Other).
+  "Pie / bar colors in slice order (largest first, then Other).
 
-  Matches clj-gpui `pie_palette`: theme `chart.1`–`chart.5`, then
-  `warning` and `danger`. Indexing (not a label hash) keeps six-plus
-  slices unique — the old 5-color hash made flutter and Other the
-  same mauve."
+  Sent as per-point `:color` — Kit paints `chart.2` when a slice omits
+  it. Tokens are Catppuccin Violet Dark `chart.1`–`chart.5`, then
+  `warning` and `danger`."
   ["#89b4fa" "#94e2d5" "#a6e3a1" "#fab387" "#cba6f7"
    "#f9e2af" "#f38ba8"])
 
 (defn chart-color
-  "Hex for pie slice `i` (0-based, largest-first). Same order as the host."
+  "Hex for chart slice `i` (0-based, largest-first)."
   [i]
   (let [n (count chart-palette)
         ix (if (zero? n) 0 (mod (long i) n))]
     (nth chart-palette ix)))
+
+(defn- with-slice-colors
+  [slices]
+  (into []
+        (map-indexed (fn [i s] (assoc s :color (chart-color i))))
+        slices))
 
 (defn legend-items
   "Pie legend rows: swatch color, name, size, percent of chart total."
@@ -70,9 +75,9 @@
   (let [total (max 1 (reduce + 0 (map #(long (:value % 0)) slices)))]
     (into []
           (map-indexed
-           (fn [i {:keys [label value]}]
+           (fn [i {:keys [label value color]}]
              {:label (str label)
-              :color (chart-color i)
+              :color (or color (chart-color i))
               :size (fmt/format-bytes value)
               :pct (fmt/percent value total)}))
           slices)))
@@ -95,8 +100,9 @@
              top (vec (take n big))
              rest (concat (drop n big) small)
              other (reduce + 0 (map #(long (:size % 0)) rest))]
-         (cond-> (mapv slice top)
-           (pos? other) (conj {:id :other :label "Other" :value other})))))))
+         (with-slice-colors
+           (cond-> (mapv slice top)
+             (pos? other) (conj {:id :other :label "Other" :value other}))))))))
 
 (defn breadcrumb-items
   "Breadcrumb widget items from the scan root to `cwd`."

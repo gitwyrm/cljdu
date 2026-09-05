@@ -13,7 +13,7 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
 - Largest-first table with kind, name, size, and percent of the current folder
-- Pie chart of the current folder with a color legend (name, size, %); Bar tab until gpui-component has horizontal bars
+- Pie chart of the current folder with a color legend (name, size, %); Bar tab uses horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Right-click the listing to open a folder or show it in the file manager
 - Native breadcrumbs, Back, Refresh
@@ -42,7 +42,7 @@ clojure -M:cljfmt fix
 
 Connect to a running UI with `clojure -M:connect`.
 
-`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `4373451ed861cce8a31d1d6882d2a0badf9b2bb2` (gpui-component widgets, protocol v6; pie slices colored by index).
+`deps.edn` depends on [clj-gpui](https://github.com/gitwyrm/clj-gpui) at git SHA `268e36845c15d307e7488233cfa88f2e069ecb36` (GPUI Kit 0.6 widgets, protocol 11).
 
 ## Packaging
 

@@ -3,7 +3,7 @@
 
   Adapted from utility_belt_gpui `src/theme.rs` (MIT OR Apache-2.0)
   via the clj-gpui Catppuccin Violet example. Color tokens are
-  gpui-component ThemeSet keys."
+  GPUI Kit ThemeSet keys."
   (:require [gpui.theme :as theme]))
 
 (def ^:private dark-colors
