@@ -13,11 +13,11 @@ Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 - Symbolic links are listed, never followed
 - Unreadable paths are skipped, not fatal
 - Largest-first table with kind, name, size, and percent of the current folder
-- Pie chart of the current folder with a color legend (name, size, %); Bar tab uses horizontal bars
+- Pie chart of the current folder with a color legend (name, size, %); hover a legend row for the full path; Bar tab uses horizontal bars
 - Double-click a directory (or select it and Open) to drill in
 - Right-click the listing to open a folder or show it in the file manager
 - Native breadcrumbs, Back, Refresh
-- Live spinner and current path while scanning (no expensive pre-scan)
+- Status bar with file/dir counts; shimmer and a progress circle while scanning (no expensive pre-scan)
 - Remembers the last folder
 - Show the current folder or selected item in Finder / the system file manager
 - Copy the current folder path

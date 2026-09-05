@@ -75,12 +75,23 @@
   (let [total (max 1 (reduce + 0 (map #(long (:value % 0)) slices)))]
     (into []
           (map-indexed
-           (fn [i {:keys [label value color]}]
-             {:label (str label)
-              :color (or color (chart-color i))
-              :size (fmt/format-bytes value)
-              :pct (fmt/percent value total)}))
+           (fn [i {:keys [id label value color]}]
+             (cond-> {:label (str label)
+                      :color (or color (chart-color i))
+                      :size (fmt/format-bytes value)
+                      :pct (fmt/percent value total)}
+               (some? id) (assoc :id id))))
           slices)))
+
+(defn legend-detail
+  "Hover-card copy for a legend row: full path, or Other's fold rule."
+  ([item]
+   (legend-detail item (System/getProperty "user.home")))
+  ([{:keys [id]} home]
+   (cond
+     (nil? id) nil
+     (= id :other) "Entries under 2% of this folder, combined."
+     :else (nav/tilde-path (str id) home))))
 
 (defn bar-points
   "Bar-tab chart points: same sizes as `usage-slices`, with formatted

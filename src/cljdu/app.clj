@@ -164,8 +164,10 @@
    (when scanning?
      (ui/hstack
       {:gap 6 :align :center}
-      (ui/spinner {:size :small})
-      (ui/label "Scanning…" {:font-size 13 :color "#cba6f7"})))))
+      (ui/progress-circle nil {:loading true :size :small
+                               :color "#cba6f7"
+                               :accessibility-label "Scanning"})
+      (ui/shimmer "Scanning…" {:id "scan-label" :color "#cba6f7"})))))
 
 (defn- path-crumbs
   [{:keys [root cwd]}]
@@ -181,29 +183,14 @@
                     {:flex 1 :on-change go-to!}))))
 
 (defn- header
-  [{:keys [root cwd tree scanning? progress]}]
+  [{:keys [root cwd tree progress]}]
   (let [node (or (nav/find-node tree cwd) tree)
-        size (or (:size node) (:bytes progress) 0)
-        files (or (:file-count node) (:files progress) 0)
-        dirs (or (:dir-count node) (:dirs progress) 0)
-        skipped (or (:skipped node) (:skipped progress) 0)]
-    (ui/vstack
-     {:gap 4}
-     (ui/hstack
-      {:align :center :gap 8}
-      (path-crumbs {:root root :cwd cwd})
-      (ui/label (fmt/format-bytes size)
-                {:font-size 18 :font-weight :semibold}))
-     (ui/hstack
-      {:gap 8 :align :center}
-      (ui/label
-       (str files " files · " dirs " dirs")
-       {:font-size 12 :color "#6c6f85"})
-      (when (pos? skipped)
-        (ui/tag (str skipped " skipped") {:variant :warning :size :small})))
-     (when (and scanning? (:path progress))
-       (ui/label (nav/tilde-path (:path progress))
-                 {:font-size 12 :color "#cba6f7"})))))
+        size (or (:size node) (:bytes progress) 0)]
+    (ui/hstack
+     {:align :center :gap 8}
+     (path-crumbs {:root root :cwd cwd})
+     (ui/label (fmt/format-bytes size)
+               {:font-size 18 :font-weight :semibold}))))
 
 (defn- empty-listing
   [message]
@@ -215,23 +202,36 @@
    {:gap 8 :padding 16}
    (ui/hstack
     {:gap 8 :align :center}
-    (ui/spinner {:size :small})
-    (ui/label "Walking the filesystem…" {:color "#6c6f85"}))
+    (ui/progress-circle nil {:loading true :size :small
+                             :color "#cba6f7"
+                             :accessibility-label "Walking the filesystem"})
+    (ui/shimmer "Walking the filesystem…" {:id "scan-walk" :color "#6c6f85"}))
    (ui/skeleton {:width 420 :height 14})
    (ui/skeleton {:width 360 :height 14})
    (ui/skeleton {:width 280 :height 14})))
+
+(defn- legend-row
+  [{:keys [label color size pct] :as item}]
+  (let [row (ui/hstack
+             {:gap 8 :align :center}
+             (ui/vstack {:width 12 :height 12 :bg color})
+             (ui/label label {:width 120})
+             (ui/label size {:color "#a6adc8" :font-size 13 :width 72})
+             (ui/label pct {:color "#a6adc8" :font-size 13 :width 40}))
+        detail (view/legend-detail item)]
+    (if (str/blank? detail)
+      row
+      (ui/hover-card
+       {:trigger row
+        :open-delay 0.25
+        :placement :right}
+       (ui/label detail {:font-size 13})))))
 
 (defn- usage-legend
   [slices]
   (apply ui/vstack
          {:gap 6 :justify :center}
-         (for [{:keys [label color size pct]} (view/legend-items slices)]
-           (ui/hstack
-            {:gap 8 :align :center}
-            (ui/vstack {:width 12 :height 12 :bg color})
-            (ui/label label {:width 120})
-            (ui/label size {:color "#a6adc8" :font-size 13 :width 72})
-            (ui/label pct {:color "#a6adc8" :font-size 13 :width 40})))))
+         (map legend-row (view/legend-items slices))))
 
 (defn- usage-chart
   [slices kind]
@@ -296,6 +296,23 @@
     :on-change #(swap! !state assoc :path-draft %)
     :on-submit submit-path!}))
 
+(defn- footer
+  [{:keys [tree cwd scanning? progress]}]
+  (let [node (or (nav/find-node tree cwd) tree)
+        files (or (:file-count node) (:files progress) 0)
+        dirs (or (:dir-count node) (:dirs progress) 0)
+        skipped (or (:skipped node) (:skipped progress) 0)
+        scan-path (when (and scanning? (:path progress))
+                    (nav/tilde-path (:path progress)))]
+    (ui/status-bar
+     {:left (ui/label (str files " files · " dirs " dirs")
+                      {:font-size 12 :color "#6c6f85"})
+      :right (when (pos? skipped)
+               (ui/tag (str skipped " skipped")
+                       {:variant :warning :size :small}))}
+     (when scan-path
+       (ui/shimmer scan-path {:id "scan-path" :color "#cba6f7"})))))
+
 (defn app []
   (let [s @!state]
     (ui/window
@@ -305,16 +322,19 @@
       :height 700
       :theme "Catppuccin Violet Dark"}
      (ui/vstack
-      {:flex 1 :padding 14 :gap 10}
-      (toolbar s)
-      (path-field s)
-      (header s)
-      (when-let [msg (:fatal s)]
-        (ui/alert msg {:variant :error
-                       :title "Scan failed"
-                       :on-close #(swap! !state assoc :fatal nil)}))
-      (ui/separator)
-      (listing s)))))
+      {:flex 1}
+      (ui/vstack
+       {:flex 1 :padding 14 :gap 10}
+       (toolbar s)
+       (path-field s)
+       (header s)
+       (when-let [msg (:fatal s)]
+         (ui/alert msg {:variant :error
+                        :title "Scan failed"
+                        :on-close #(swap! !state assoc :fatal nil)}))
+       (ui/separator)
+       (listing s))
+      (footer s)))))
 
 (defn- maybe-restore!
   []
