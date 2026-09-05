@@ -245,10 +245,10 @@
                  :variant :underline
                  :on-change #(swap! !state assoc :chart %)})
        (if (= kind :bar)
-         (ui/bar-chart slices {:height 180})
+         (ui/horizontal-bar-chart (view/bar-points slices))
          (ui/hstack
-          {:align :center :gap 16 :height 200}
-          (ui/pie-chart slices {:width 180 :height 180})
+          {:align :center :gap 16 :height 240}
+          (ui/pie-chart slices {:width 400 :height 240 :labels true})
           (usage-legend slices)))))))
 
 (defn- listing
@@ -279,16 +279,16 @@
         (ui/context-menu
          (listing-menu (assoc state :selected selected))
          {:flex 1 :on-change on-listing-menu}
-         (ui/table {:columns view/listing-columns
-                    :rows (view/listing-rows node)
-                    :selected selected
-                    :flex 1
-                    :on-change #(swap! !state assoc :selected %)
-                    :on-confirm enter-id!})))))))
+         (ui/data-table {:columns view/listing-columns
+                         :rows (view/listing-rows node)
+                         :selected selected
+                         :flex 1
+                         :on-change #(swap! !state assoc :selected %)
+                         :on-confirm enter-id!})))))))
 
 (defn- path-field
   [{:keys [path-draft]}]
-  (ui/text-field
+  (ui/input
    path-draft
    {:id "path"
     :placeholder "Folder path — Enter to scan"
@@ -313,7 +313,7 @@
         (ui/alert msg {:variant :error
                        :title "Scan failed"
                        :on-close #(swap! !state assoc :fatal nil)}))
-      (ui/divider)
+      (ui/separator)
       (listing s)))))
 
 (defn- maybe-restore!

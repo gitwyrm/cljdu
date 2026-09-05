@@ -20,19 +20,19 @@
   (is (empty? (view/listing-rows {:children []}))))
 
 (deftest usage-slices-cap-and-other
-  (is (= [{:id "/r/big" :label "big" :value 60}
-          {:id "/r/mid" :label "mid.txt" :value 30}
-          {:id "/r/tiny" :label "tiny" :value 10}]
+  (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa"}
+          {:id "/r/mid" :label "mid.txt" :value 30 :color "#94e2d5"}
+          {:id "/r/tiny" :label "tiny" :value 10 :color "#a6e3a1"}]
          (view/usage-slices (:children sample-node) 6)))
-  (is (= [{:id "/r/big" :label "big" :value 60}
-          {:id :other :label "Other" :value 40}]
+  (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa"}
+          {:id :other :label "Other" :value 40 :color "#94e2d5"}]
          (view/usage-slices (:children sample-node) 1)))
   (is (empty? (view/usage-slices [])))
   (is (empty? (view/usage-slices [{:path "/z" :name "z" :size 0}]))))
 
 (deftest usage-slices-fold-tiny-into-other
-  (is (= [{:id "/a" :label "a" :value 100}
-          {:id :other :label "Other" :value 1}]
+  (is (= [{:id "/a" :label "a" :value 100 :color "#89b4fa"}
+          {:id :other :label "Other" :value 1 :color "#94e2d5"}]
          (view/usage-slices [{:path "/a" :name "a" :size 100}
                              {:path "/b" :name "b" :size 1}] 6))))
 
@@ -75,3 +75,13 @@
     (is (= "#fab387" (:color (last items))))
     (is (not= (:color (first items)) (:color (last items)))))
   (is (empty? (view/legend-items []))))
+
+(deftest bar-points-put-format-bytes-on-display
+  (is (= [{:id "/r/big" :label "big" :value 60 :color "#89b4fa" :display "60 B"}
+          {:id "/r/mid" :label "mid.txt" :value 30 :color "#94e2d5" :display "30 B"}
+          {:id "/r/tiny" :label "tiny" :value 10 :color "#a6e3a1" :display "10 B"}]
+         (view/bar-points (view/usage-slices (:children sample-node) 6))))
+  (is (= "450.0 KB"
+         (:display (first (view/bar-points
+                           [{:id :flutter :label "flutter" :value 460800}])))))
+  (is (empty? (view/bar-points []))))
