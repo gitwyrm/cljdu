@@ -6,6 +6,8 @@ A small native disk-usage browser inspired by `ncdu`.
 
 Primary platforms: **macOS** and **Linux**. Windows is out of scope.
 
+![Screenshot](https://i.imgur.com/7T7U7E0.png)
+
 ## Features
 
 - Native folder picker (GPUI / desktop portal, with `zenity` fallback on Linux)
